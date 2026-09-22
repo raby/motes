@@ -1,0 +1,13 @@
+{
+  "name": "motes",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Connected-components / blob detection — WebAssembly build of the motes C++ library",
+  "type": "module",
+  "scripts": {
+    "build": "bash ./build.sh",
+    "smoke": "node smoke.mjs"
+  },
+  "license": "MIT",
+  "comment": "Pre-publish skeleton. The ergonomic TypeScript wrapper, types, and npm metadata land with the publish slice; `private` and the 0.0.0 version keep it from being published by accident until then."
+}

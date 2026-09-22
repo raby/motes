@@ -3,6 +3,7 @@
 /cmake-build-*/
 
 # WebAssembly / npm (Phase 2)
+/web/build/
 /web/node_modules/
 /web/dist/
 

@@ -24,3 +24,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning: [S
   ctest) with a naive iterative baseline. On an Apple Silicon Mac a 640×480 frame labels in ~0.87 ms
   (353 MPix/s, ~1150 fps) — ~1.1× a good flood fill (linear either way) and ~31× the naive iterative
   approach. Full table in the README.
+- WebAssembly: an Emscripten/embind binding (`web/binding.cpp`) exposing `labelMask` to JavaScript,
+  a `web/build.sh` producing a ~16 KB `.wasm` plus an ES-module loader, and a Node smoke test
+  (`web/smoke.mjs`) confirming the WASM path returns the same blobs as native. CI builds and
+  smoke-tests it (setup-emsdk). Minimal, private `web/package.json` skeleton (not yet published).

@@ -20,3 +20,17 @@ jobs:
         run: cmake --build build --config Release
       - name: Test
         run: ctest --test-dir build --output-on-failure
+
+  wasm:
+    name: wasm build + node smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mymindstorm/setup-emsdk@v14
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build the WASM module
+        run: ./web/build.sh
+      - name: Node smoke test (WASM matches native)
+        run: node web/smoke.mjs
