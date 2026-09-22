@@ -8,6 +8,8 @@
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>
+#include <random>
+#include <string>
 #include <vector>
 
 using namespace motes;
@@ -160,6 +162,40 @@ TEST_CASE("the union-find labeller matches the reference oracle") {
       CAPTURE(static_cast<int>(conn));
       CHECK(same_blobs(detail::union_find_label(m.mask(), conn),
                        detail::reference_label(m.mask(), conn)));
+    }
+  }
+}
+
+TEST_CASE("property: the fast path agrees with the oracle on random masks") {
+  // Deterministic seed so any failure reproduces exactly.
+  std::mt19937 rng(0xC0FFEEu);
+  std::uniform_int_distribution<int> dim(0, 24); // include 0 (empty) up to 24x24
+  std::uniform_real_distribution<double> density(0.0, 1.0);
+
+  for (int iter = 0; iter < 800; ++iter) {
+    const int w = dim(rng);
+    const int h = dim(rng);
+    std::bernoulli_distribution fg(density(rng)); // vary sparse..dense
+    std::vector<std::uint8_t> pixels(static_cast<std::size_t>(w) * static_cast<std::size_t>(h));
+    for (std::uint8_t& px : pixels) px = fg(rng) ? std::uint8_t{255} : std::uint8_t{0};
+    const Mask mask{pixels.data(), w, h};
+
+    for (const Connectivity conn : {Connectivity::Four, Connectivity::Eight}) {
+      const bool ok = same_blobs(detail::union_find_label(mask, conn),
+                                 detail::reference_label(mask, conn));
+      if (!ok) {
+        std::string art; // reproduce the exact mask on failure
+        for (int y = 0; y < h; ++y) {
+          for (int x = 0; x < w; ++x) art += mask.foreground(x, y) ? '#' : '.';
+          art += '\n';
+        }
+        CAPTURE(iter);
+        CAPTURE(w);
+        CAPTURE(h);
+        CAPTURE(static_cast<int>(conn));
+        CAPTURE(art);
+      }
+      REQUIRE(ok);
     }
   }
 }
