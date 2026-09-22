@@ -37,7 +37,7 @@ portable enough to run in a browser tab.
 - **Header-only C++17**, zero dependencies.
 - Two-pass **union-find** connected-components labelling, 4- or 8-connectivity.
 - Correctness pinned by a **property test** against a brute-force reference.
-- A **JMH-style benchmark** with published numbers.
+- A self-contained **benchmark** (`bench/`) with published numbers (below).
 - Compiles to **WebAssembly** (Emscripten) and ships on **npm** for the web.
 
 ## Build & test
@@ -50,6 +50,28 @@ ctest --test-dir build --output-on-failure
 
 Header-only, so to *use* it you only need the `include/` directory (or add this repo via CMake
 `FetchContent` and link `motes::motes`).
+
+## Performance
+
+Connected-components labelling is inherently linear, so `motes` is only *modestly* faster than a
+good flood fill — the honest wins are that it is **real-time** and far quicker than the naive way.
+
+Measured on an Apple Silicon Mac (clang `-O3`, best of many reps; numbers are machine-dependent),
+on synthetic frames of random filled rectangles:
+
+| Resolution | motes | throughput | vs flood fill | vs naive iterative |
+|---|---|---|---|---|
+| 640×480 | 0.87 ms | 353 MPix/s (~1150 fps) | 1.06× | **31× faster** |
+| 1280×720 | 3.9 ms | 238 MPix/s (~258 fps) | 1.11× | — |
+| 1920×1080 | 11.2 ms | 186 MPix/s (~90 fps) | 1.13× | — |
+
+A webcam frame is labelled in well under a millisecond — roughly 38× the headroom needed for 30fps —
+which is what makes the live browser demo possible. Run it yourself:
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build
+./build/motes_bench
+```
 
 ## Roadmap
 

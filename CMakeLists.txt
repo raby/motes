@@ -30,3 +30,22 @@ if(MOTES_BUILD_TESTS)
   endif()
   add_test(NAME motes_tests COMMAND motes_tests)
 endif()
+
+# Benchmark: a standalone, optimised executable. Built (so CI keeps it compiling) but not run by
+# ctest — benchmarks are noisy. Run it by hand: ./build/motes_bench
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  option(MOTES_BUILD_BENCH "Build the motes benchmark" ON)
+else()
+  option(MOTES_BUILD_BENCH "Build the motes benchmark" OFF)
+endif()
+
+if(MOTES_BUILD_BENCH)
+  add_executable(motes_bench bench/bench.cpp)
+  target_link_libraries(motes_bench PRIVATE motes)
+  target_compile_features(motes_bench PRIVATE cxx_std_17)
+  if(MSVC)
+    target_compile_options(motes_bench PRIVATE /O2)
+  else()
+    target_compile_options(motes_bench PRIVATE -O3)
+  endif()
+endif()

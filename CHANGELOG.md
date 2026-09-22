@@ -20,3 +20,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning: [S
 - Property test: 800 random masks (varied size and density, fixed seed) assert the fast path equals
   the oracle for both connectivities — ~1600 comparisons — printing the offending mask if they ever
   differ. The labeller's correctness is pinned, not just spot-checked.
+- Benchmark: a self-contained `std::chrono` harness (`bench/bench.cpp`, built at `-O3`, not run by
+  ctest) with a naive iterative baseline. On an Apple Silicon Mac a 640×480 frame labels in ~0.87 ms
+  (353 MPix/s, ~1150 fps) — ~1.1× a good flood fill (linear either way) and ~31× the naive iterative
+  approach. Full table in the README.
