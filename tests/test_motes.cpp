@@ -4,13 +4,37 @@
 #include "motes/motes.hpp"
 
 #include <cstdint>
+#include <cstring>
+#include <initializer_list>
 #include <vector>
 
 using namespace motes;
 
-// Slice 1 pins the API shape and the harness. With the stub labeller these pass because there is
-// nothing to find; Slices 2–5 add the real cases (single blob, multiple, 4- vs 8-connectivity,
-// holes, edges) and the brute-force property test.
+namespace {
+
+// A mask built from ASCII rows: '#' is foreground, anything else is background. Keeps its own
+// pixel buffer, so hold the object alive while the Mask view is in use.
+struct AsciiMask {
+  std::vector<std::uint8_t> pixels;
+  int width = 0;
+  int height = 0;
+  Mask mask() const { return Mask{pixels.data(), width, height}; }
+};
+
+AsciiMask make(std::initializer_list<const char*> rows) {
+  AsciiMask m;
+  m.height = static_cast<int>(rows.size());
+  m.width = (m.height > 0) ? static_cast<int>(std::strlen(*rows.begin())) : 0;
+  m.pixels.reserve(static_cast<std::size_t>(m.width) * static_cast<std::size_t>(m.height));
+  for (const char* row : rows) {
+    for (int x = 0; x < m.width; ++x) {
+      m.pixels.push_back(row[x] == '#' ? std::uint8_t{255} : std::uint8_t{0});
+    }
+  }
+  return m;
+}
+
+} // namespace
 
 TEST_CASE("an empty mask has no blobs") {
   std::vector<std::uint8_t> pixels; // 0x0
@@ -26,11 +50,81 @@ TEST_CASE("an all-background mask has no blobs") {
 }
 
 TEST_CASE("Mask::foreground reads the row-major buffer") {
-  // A single lit pixel at (2, 1) in a 4x3 mask.
   std::vector<std::uint8_t> pixels(4 * 3, 0);
-  pixels[1 * 4 + 2] = 255;
+  pixels[1 * 4 + 2] = 255; // (2, 1) lit
   const Mask mask{pixels.data(), 4, 3};
   CHECK(mask.foreground(2, 1));
   CHECK_FALSE(mask.foreground(0, 0));
   CHECK_FALSE(mask.foreground(3, 2));
+}
+
+TEST_CASE("a single filled rectangle is one blob, with the right stats") {
+  const AsciiMask m = make({
+      "......",
+      ".###..",
+      ".###..",
+      "......",
+  });
+  const auto blobs = label(m.mask());
+  REQUIRE(blobs.size() == 1);
+  const Blob& b = blobs[0];
+  CHECK(b.area == 6);
+  CHECK(b.min_x == 1);
+  CHECK(b.max_x == 3);
+  CHECK(b.min_y == 1);
+  CHECK(b.max_y == 2);
+  CHECK(b.centroid_x == doctest::Approx(2.0));
+  CHECK(b.centroid_y == doctest::Approx(1.5));
+}
+
+TEST_CASE("separate regions are separate blobs") {
+  const AsciiMask m = make({
+      "#..#",
+      "#..#",
+      "....",
+      ".##.",
+  });
+  CHECK(label(m.mask(), Connectivity::Four).size() == 3); // left bar, right bar, bottom pair
+}
+
+TEST_CASE("a diagonal touch joins under 8-connectivity and splits under 4-connectivity") {
+  const AsciiMask m = make({
+      "#.",
+      ".#",
+  });
+  CHECK(label(m.mask(), Connectivity::Eight).size() == 1);
+  CHECK(label(m.mask(), Connectivity::Four).size() == 2);
+}
+
+TEST_CASE("a ring is a single blob — a hole does not split the foreground") {
+  const AsciiMask m = make({
+      "#####",
+      "#...#",
+      "#...#",
+      "#####",
+  });
+  const auto blobs = label(m.mask());
+  REQUIRE(blobs.size() == 1);
+  const Blob& b = blobs[0];
+  CHECK(b.area == 14); // 20 pixels minus a 3x2 hole
+  CHECK(b.min_x == 0);
+  CHECK(b.max_x == 4);
+  CHECK(b.min_y == 0);
+  CHECK(b.max_y == 3);
+}
+
+TEST_CASE("blobs are labelled 1-based in raster order of first encounter") {
+  const AsciiMask m = make({
+      "#.#",
+      "...",
+      "#..",
+  });
+  const auto blobs = label(m.mask(), Connectivity::Four);
+  REQUIRE(blobs.size() == 3);
+  CHECK(blobs[0].label == 1); // top-left
+  CHECK(blobs[1].label == 2); // top-right
+  CHECK(blobs[2].label == 3); // bottom-left
+  CHECK(blobs[0].min_x == 0);
+  CHECK(blobs[1].min_x == 2);
+  CHECK(blobs[2].min_y == 2);
 }
