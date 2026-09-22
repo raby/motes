@@ -3,6 +3,8 @@
 
 #include "motes/motes.hpp"
 
+#include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>
@@ -32,6 +34,20 @@ AsciiMask make(std::initializer_list<const char*> rows) {
     }
   }
   return m;
+}
+
+// Field-wise blob comparison (centroids within a tiny epsilon).
+bool same_blobs(const std::vector<Blob>& a, const std::vector<Blob>& b) {
+  if (a.size() != b.size()) return false;
+  for (std::size_t i = 0; i < a.size(); ++i) {
+    if (a[i].label != b[i].label) return false;
+    if (a[i].min_x != b[i].min_x || a[i].max_x != b[i].max_x) return false;
+    if (a[i].min_y != b[i].min_y || a[i].max_y != b[i].max_y) return false;
+    if (a[i].area != b[i].area) return false;
+    if (std::abs(a[i].centroid_x - b[i].centroid_x) > 1e-9) return false;
+    if (std::abs(a[i].centroid_y - b[i].centroid_y) > 1e-9) return false;
+  }
+  return true;
 }
 
 } // namespace
@@ -127,4 +143,23 @@ TEST_CASE("blobs are labelled 1-based in raster order of first encounter") {
   CHECK(blobs[0].min_x == 0);
   CHECK(blobs[1].min_x == 2);
   CHECK(blobs[2].min_y == 2);
+}
+
+TEST_CASE("the union-find labeller matches the reference oracle") {
+  const AsciiMask masks[] = {
+      make({".###.", ".#.#.", ".###."}),                   // ring
+      make({"#.#", "#.#", "###"}),                         // U: two labels merge at the bottom
+      make({"#..#", "#..#", "....", ".##."}),              // separate regions
+      make({"#.", ".#"}),                                  // diagonal touch
+      make({"#####", "#...#", "#.#.#", "#...#", "#####"}), // frame + an isolated speck
+      make({".##..##.", ".##..##.", "........", "..####..", "..####.."}),
+  };
+  for (const AsciiMask& m : masks) {
+    for (const Connectivity conn : {Connectivity::Four, Connectivity::Eight}) {
+      CAPTURE(m.width);
+      CAPTURE(static_cast<int>(conn));
+      CHECK(same_blobs(detail::union_find_label(m.mask(), conn),
+                       detail::reference_label(m.mask(), conn)));
+    }
+  }
 }
