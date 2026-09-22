@@ -1,11 +1,9 @@
 // motes — small, fast, dependency-free connected-components / blob detection for C++.
 //
-// Header-only, C++17, zero dependencies. Give it a binary mask; get back the connected
-// regions ("motes"), each with a bounding box, pixel area and centroid.
-//
-// Slice 3: `label` now uses `detail::union_find_label`, a two-pass connected-components labeller
-// (the fast path). `detail::reference_label` (flood fill) is kept as the obviously-correct oracle
-// the fast path is checked against here, and property-tested against over random images (Slice 5).
+// Header-only, C++17, zero dependencies. Give it a binary mask; get back the connected regions
+// ("motes"), each with a bounding box, pixel area and centroid. The public entry point is
+// `motes::label`, which runs a two-pass union-find labeller (`detail::union_find_label`); a
+// flood-fill (`detail::reference_label`) is kept as the reference the fast path is tested against.
 #ifndef MOTES_MOTES_HPP
 #define MOTES_MOTES_HPP
 
@@ -68,7 +66,8 @@ inline std::vector<Blob> reference_label(const Mask& mask, Connectivity conn) {
 
   for (int sy = 0; sy < h; ++sy) {
     for (int sx = 0; sx < w; ++sx) {
-      const std::size_t seed = static_cast<std::size_t>(sy) * static_cast<std::size_t>(w) + sx;
+      const std::size_t seed =
+          static_cast<std::size_t>(sy) * static_cast<std::size_t>(w) + static_cast<std::size_t>(sx);
       if (!mask.foreground(sx, sy) || labels[seed] != 0) continue;
 
       ++next_label;
@@ -102,7 +101,8 @@ inline std::vector<Blob> reference_label(const Mask& mask, Connectivity conn) {
           const int nx = px + dx8[d];
           const int ny = py + dy8[d];
           if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
-          const std::size_t n = static_cast<std::size_t>(ny) * static_cast<std::size_t>(w) + nx;
+          const std::size_t n =
+              static_cast<std::size_t>(ny) * static_cast<std::size_t>(w) + static_cast<std::size_t>(nx);
           if (labels[n] != 0 || !mask.foreground(nx, ny)) continue;
           labels[n] = next_label;
           stack.push_back(static_cast<int>(n));
