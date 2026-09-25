@@ -27,4 +27,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning: [S
 - WebAssembly: an Emscripten/embind binding (`web/binding.cpp`) exposing `labelMask` to JavaScript,
   a `web/build.sh` producing a ~16 KB `.wasm` plus an ES-module loader, and a Node smoke test
   (`web/smoke.mjs`) confirming the WASM path returns the same blobs as native. CI builds and
-  smoke-tests it (setup-emsdk). Minimal, private `web/package.json` skeleton (not yet published).
+  smoke-tests it (setup-emsdk).
+- npm package: an ergonomic wrapper (`web/index.mjs`) — `label(mask, w, h, opts)` and
+  `labelImageData(image, opts)` (threshold an RGBA image, then label), hiding the malloc/free — with
+  TypeScript types (`index.d.ts`) and package metadata (`motes@0.1.0`, `files`, `exports`, a
+  `prepublishOnly` that builds + smoke-tests). The published tarball is ~20 KB (7 files). The smoke
+  test now exercises the public API including `labelImageData` and undersized-mask error handling.

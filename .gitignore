@@ -2,7 +2,9 @@
 /build/
 /cmake-build-*/
 
-# WebAssembly / npm (Phase 2)
+# WebAssembly / npm — generated build output (still published, via package.json "files")
+/web/motes.mjs
+/web/motes.wasm
 /web/build/
 /web/node_modules/
 /web/dist/

@@ -1,13 +1,45 @@
 {
   "name": "motes",
-  "version": "0.0.0",
-  "private": true,
-  "description": "Connected-components / blob detection — WebAssembly build of the motes C++ library",
+  "version": "0.1.0",
+  "description": "Small, fast, dependency-free connected-components / blob detection, compiled to WebAssembly",
   "type": "module",
+  "main": "index.mjs",
+  "module": "index.mjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs"
+    }
+  },
+  "files": [
+    "index.mjs",
+    "index.d.ts",
+    "motes.mjs",
+    "motes.wasm",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "connected-components",
+    "blob-detection",
+    "computer-vision",
+    "image-processing",
+    "wasm",
+    "webassembly"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raby/motes.git",
+    "directory": "web"
+  },
+  "homepage": "https://github.com/raby/motes#readme",
+  "bugs": "https://github.com/raby/motes/issues",
+  "license": "MIT",
+  "author": "Raby Whyte",
   "scripts": {
     "build": "bash ./build.sh",
-    "smoke": "node smoke.mjs"
-  },
-  "license": "MIT",
-  "comment": "Pre-publish skeleton. The ergonomic TypeScript wrapper, types, and npm metadata land with the publish slice; `private` and the 0.0.0 version keep it from being published by accident until then."
+    "smoke": "node smoke.mjs",
+    "prepublishOnly": "bash ./build.sh && node smoke.mjs"
+  }
 }

@@ -5,8 +5,8 @@ set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
 root="$(cd "$here/.." && pwd)"
-mkdir -p "$here/build"
 
+# Output lands next to the wrapper (index.mjs) so the package publishes as one flat directory.
 em++ -std=c++17 -O3 -I "$root/include" "$here/binding.cpp" \
   -lembind \
   -sMODULARIZE=1 \
@@ -16,7 +16,7 @@ em++ -std=c++17 -O3 -I "$root/include" "$here/binding.cpp" \
   -sEXPORTED_RUNTIME_METHODS=HEAPU8 \
   -sALLOW_MEMORY_GROWTH=1 \
   -sENVIRONMENT=web,node \
-  -o "$here/build/motes.mjs"
+  -o "$here/motes.mjs"
 
-echo "built: $here/build/motes.mjs (+ motes.wasm)"
-ls -lh "$here/build/"
+echo "built:"
+ls -lh "$here/motes.mjs" "$here/motes.wasm"

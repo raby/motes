@@ -73,6 +73,20 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build
 ./build/motes_bench
 ```
 
+## In the browser (npm)
+
+The same core ships to npm as a ~16 KB WebAssembly module — see [`web/`](web/):
+
+```js
+import { labelImageData } from 'motes'
+
+const image = ctx.getImageData(0, 0, canvas.width, canvas.height)
+const blobs = await labelImageData(image, { threshold: 128, connectivity: 8 })
+// each blob: { label, minX, minY, maxX, maxY, area, centroidX, centroidY }
+```
+
+Everything runs client-side — no server, no upload.
+
 ## Roadmap
 
 Built in small, reviewed slices: C++ core (labeller → blob stats → property test → benchmark) →
