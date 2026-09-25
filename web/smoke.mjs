@@ -71,6 +71,15 @@ function check(cond, msg) {
   }
   check(threw, 'label() throws RangeError on an undersized mask')
 }
+{
+  let threw = false
+  try {
+    await label(new Uint8Array(0), -1, 4) // negative width
+  } catch (e) {
+    threw = e instanceof RangeError
+  }
+  check(threw, 'label() throws RangeError on negative dimensions')
+}
 
 if (failures) {
   console.error(`\n${failures} check(s) failed`)

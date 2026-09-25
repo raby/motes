@@ -36,6 +36,8 @@ portable enough to run in a browser tab.
 
 - **Header-only C++17**, zero dependencies.
 - Two-pass **union-find** connected-components labelling, 4- or 8-connectivity.
+- **Stateless and thread-safe** — `label` reads the mask and returns a fresh result, holding no
+  shared state, so it is safe to call concurrently.
 - Correctness pinned by a **property test** against a brute-force reference.
 - A self-contained **benchmark** (`bench/`) with published numbers (below).
 - Compiles to **WebAssembly** (Emscripten) and ships on **npm** for the web.

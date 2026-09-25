@@ -37,6 +37,9 @@
   "bugs": "https://github.com/raby/motes/issues",
   "license": "MIT",
   "author": "Raby Whyte",
+  "engines": {
+    "node": ">=16"
+  },
   "scripts": {
     "build": "bash ./build.sh",
     "smoke": "node smoke.mjs",

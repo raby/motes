@@ -24,13 +24,16 @@ function moduleReady() {
  */
 export async function label(mask, width, height, options = {}) {
   const connectivity = options.connectivity === 4 ? 4 : 8
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 0 || height < 0) {
+    throw new RangeError(`motes.label: width and height must be non-negative integers, got ${width} x ${height}`)
+  }
   const n = width * height
+  if (n === 0) return []
   if (!mask || typeof mask.length !== 'number' || mask.length < n) {
     throw new RangeError(
       `motes.label: mask needs at least ${n} bytes for ${width}x${height}, got ${mask ? mask.length : 'nothing'}`,
     )
   }
-  if (n === 0) return []
 
   const Module = await moduleReady()
   const ptr = Module._malloc(n)
@@ -51,6 +54,14 @@ export async function label(mask, width, height, options = {}) {
  */
 export async function labelImageData(image, options = {}) {
   const { data, width, height } = image
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 0 || height < 0) {
+    throw new RangeError(`motes.labelImageData: width and height must be non-negative integers, got ${width} x ${height}`)
+  }
+  if (!data || data.length < width * height * 4) {
+    throw new RangeError(
+      `motes.labelImageData: RGBA data needs ${width * height * 4} bytes for ${width}x${height}, got ${data ? data.length : 'nothing'}`,
+    )
+  }
   const threshold = options.threshold ?? 128
   const mask = new Uint8Array(width * height)
   for (let i = 0, p = 0; i < mask.length; i++, p += 4) {
