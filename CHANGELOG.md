@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning: [S
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-25
+
+### Fixed
+- Build the WebAssembly module with `-sDYNAMIC_EXECUTION=0` so embind no longer generates its call
+  invokers with `new Function(...)`. Under a strict Content-Security-Policy (no `'unsafe-eval'`) the
+  previous build threw `EvalError` from `createJsInvoker` on first use; the module now runs with only
+  the narrow `'wasm-unsafe-eval'` allowed. No API change; the `.wasm` and all smoke checks are
+  unchanged, and the JS glue shrinks from ~30 KB to ~28 KB.
+
 ## [0.1.0] - 2026-09-25
 
 ### Added
