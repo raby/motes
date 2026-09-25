@@ -5,13 +5,13 @@ Give it a binary mask (or an image + a threshold); get back the connected region
 bounding box, area and centroid. The core is a header-only C++ library — this is its web build.
 
 ```sh
-npm install motes
+npm install @raby/motes
 ```
 
 ## Usage
 
 ```js
-import { labelImageData, label } from 'motes'
+import { labelImageData, label } from '@raby/motes'
 
 // From a canvas ImageData (thresholded on luma, default 128):
 const image = ctx.getImageData(0, 0, canvas.width, canvas.height)

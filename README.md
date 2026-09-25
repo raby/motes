@@ -77,10 +77,10 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build
 
 ## In the browser (npm)
 
-The same core ships to npm as a ~16 KB WebAssembly module — see [`web/`](web/):
+The same core ships to npm as a ~16 KB WebAssembly module (`@raby/motes`) — see [`web/`](web/):
 
 ```js
-import { labelImageData } from 'motes'
+import { labelImageData } from '@raby/motes'
 
 const image = ctx.getImageData(0, 0, canvas.width, canvas.height)
 const blobs = await labelImageData(image, { threshold: 128, connectivity: 8 })

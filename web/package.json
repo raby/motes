@@ -1,5 +1,5 @@
 {
-  "name": "motes",
+  "name": "@raby/motes",
   "version": "0.1.0",
   "description": "Small, fast, dependency-free connected-components / blob detection, compiled to WebAssembly",
   "type": "module",
@@ -37,6 +37,9 @@
   "bugs": "https://github.com/raby/motes/issues",
   "license": "MIT",
   "author": "Raby Whyte",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=16"
   },
